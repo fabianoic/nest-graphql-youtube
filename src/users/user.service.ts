@@ -42,16 +42,24 @@ export class UserService {
     return await this.userRepository.find();
   }
 
-  async updateUser(data: UpdateUserInput): Promise<User> {
-    const user = await this.getUserById(data.id);
-    return this.userRepository.save({ ...user, ...data });
+  async updateUser(data: UpdateUserInput, loggedUser: User): Promise<User> {
+    if(loggedUser.id === data.id){
+      const user = await this.getUserById(data.id);
+      return this.userRepository.save({ ...user, ...data });
+    } else {
+      throw new InternalServerErrorException();
+    }
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string, loggedUser: User): Promise<void> {
+    if(loggedUser.id === id){
     const user = await this.getUserById(id);
     const userDeleted = await this.userRepository.delete(user);
     if (!userDeleted) {
       throw new InternalServerErrorException();
     }
+  } else {
+    throw new InternalServerErrorException();
+  }
   }
 }

@@ -6,6 +6,7 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from './user.decorator';
 
 @Resolver('User')
 export class UserResolver {
@@ -32,17 +33,19 @@ export class UserResolver {
     return await this.userService.findAllUsers();
   }
 
+  @UseGuards(GqlAuthGuard)
   @Mutation(() => User)
-  async updateUser(
+  async updateUser(@CurrentUser() loggedUser: User,
     @Args('id') id: string,
     @Args('data') data: UpdateUserInput,
   ): Promise<User> {
-    return this.userService.updateUser({ id, ...data });
+    return this.userService.updateUser({ id, ...data }, loggedUser);
   }
 
+  @UseGuards(GqlAuthGuard)
   @Mutation(() => Boolean)
-  async deleteUser(@Args('id') id: string): Promise<true> {
-    await this.userService.deleteUser(id);
+  async deleteUser(@CurrentUser() loggedUser: User, @Args('id') id: string): Promise<true> {
+    await this.userService.deleteUser(id, loggedUser);
     return true;
   }
 }
