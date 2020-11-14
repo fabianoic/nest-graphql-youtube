@@ -1,5 +1,12 @@
 module.exports = {
   type: 'postgres',
+  cache: {
+    type: 'redis',
+    options: {
+      host: 'localhost',
+      port: 6379,
+    },
+  },
   host: process.env.DB_HOST,
   port: +process.env.DB_PORT || 5432,
   username: process.env.DB_USERNAME,
