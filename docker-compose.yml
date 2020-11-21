@@ -33,6 +33,17 @@ services:
       - 5432
     volumes:
       - api_db_data:/var/lib/postgresql/data
+  redis:
+    image: redis:alpine
+    command: redis-server
+    ports:
+      - "6379:6379"
+    hostname: redis
+    container_name: nest_redis
+    networks:
+      - backend
+    depends_on:
+      - postgres
 networks:
   backend:
 volumes:
