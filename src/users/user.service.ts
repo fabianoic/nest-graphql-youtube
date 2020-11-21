@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, getConnection } from 'typeorm';
 
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
@@ -19,7 +19,9 @@ export class UserService {
 
   async createUser(data: CreateUserInput): Promise<User> {
     const user = this.userRepository.create(data);
-    return this.userRepository.save(user);
+    const userSaved = this.userRepository.save(user);
+    await getConnection().queryResultCache.remove(['listUsers']);
+    return userSaved;
   }
 
   async getUserById(id: string): Promise<User> {
@@ -39,7 +41,7 @@ export class UserService {
   }
 
   async findAllUsers(): Promise<User[]> {
-    return await this.userRepository.find();
+    return await this.userRepository.find({cache: { id: 'listUsers', milliseconds: 15000 }});
   }
 
   async updateUser(data: UpdateUserInput, loggedUser: User): Promise<User> {
